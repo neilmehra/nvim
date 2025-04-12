@@ -13,7 +13,6 @@ return {
     config = function()
       require("nvim-treesitter.configs").setup {
         ensure_installed = {
-          "asm",
           "bash",
           "cmake",
           "cpp",

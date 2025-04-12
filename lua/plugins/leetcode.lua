@@ -12,10 +12,11 @@ return {
       lang = "cpp",
       injector = { ---@type table<lc.lang, lc.inject>
         ["cpp"] = {
-          before = { "#include <bits/stdc++.h>\nusing namespace std;"},
+          before = { "#include <bits/stdc++.h>\nusing namespace std;" },
           after = "int main() {}",
         },
       },
+      image_support = true,
     },
   },
 }
