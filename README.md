@@ -17,6 +17,10 @@ I use neovim v0.10.3, other versions may/may not work.
 - pandoc
 - texlive
 
+- turtle lsp
+- sparql lsp
+- oxigraph
+
 
 ## Install
 Clone this under your ~/.config/nvim directory
@@ -25,3 +29,18 @@ Clone this under your ~/.config/nvim directory
 git clone https://github.com/neilmehra/nvim.git ~/.config/nvim
 ```
 
+
+For my notes setup
+
+```
+
+sudo npm i -g turtle-language-server sparql-language-server
+cargo install oxigraph-cli --locked
+mkdir -p kb/{.oxigraph,assets,bin,build,kg,notes,queries,templates,update,kg/assets,kg/notes}
+
+```
+
+Start the oxigraph server
+```
+oxigraph serve --location kb/.oxigraph --bind 127.0.0.1:7878
+```

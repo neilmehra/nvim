@@ -115,3 +115,49 @@ local function paste_image()
 end
 
 keymap("n", "<leader>p", paste_image, opts);
+
+
+
+local function sidecar_path(note_path)
+  local p = note_path
+  p = p:gsub("/notes/", "/kg/notes/")
+  p = p:gsub("%.md$", ".ttl")
+  return p
+end
+
+local function ensure_file(path, lines)
+  local f = io.open(path, "r")
+  if f then f:close(); return end
+  vim.fn.mkdir(vim.fn.fnamemodify(path, ":h"), "p")
+  local wf = io.open(path, "w")
+  for _, l in ipairs(lines) do wf:write(l .. "\n") end
+  wf:close()
+end
+
+vim.keymap.set("n", "<leader>km", function()
+  local note = vim.fn.expand("%:p")
+  if not note:match("/notes/") or not note:match("%.md$") then
+    print("Not a notes/*.md file")
+    return
+  end
+  local side = sidecar_path(note)
+
+  ensure_file(side, {
+'@prefix kb:  <https://kb.neil.me/> .',
+'@prefix rel: <https://kb.neil.me/rel/> .',
+'@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .',
+'@prefix rdfs:<http://www.w3.org/2000/01/rdf-schema#> .',
+'',
+'kb:note/aluffi-0.1-reading',
+'  a kb:Note ;',
+'  rel:file "notes/math/aluffi/ch0/0.1-reading.md" ;',
+'  rel:tag kb:status/draft ;',
+'  rel:tag kb:subject/abstract-algebra ;',
+'  rel:inSource kb:source/aluffi-algebra ;',
+'  rel:inSection kb:section/aluffi-0.1 ;',
+'  rel:about kb:concept/group ;',
+'  rel:about kb:concept/homomorphism .'
+  })
+
+  vim.cmd("vsplit " .. vim.fn.fnameescape(side))
+end, { desc = "Open KG sidecar for current note" })

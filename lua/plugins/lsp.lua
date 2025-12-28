@@ -46,6 +46,12 @@ return {
       end
 
       lspconfig["clangd"].setup {
+        cmd = {
+          "clangd",
+          "--query-driver=/nix/store/*-gcc-wrapper-*/bin/g++",
+          "--background-index",
+          "--clang-tidy",
+        },
         on_attach = on_attach,
       }
 
