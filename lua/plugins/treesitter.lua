@@ -1,34 +1,30 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    version = false, -- last release is way too old and doesn't work on Windows
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
-    dependencies = {
-      {
-        "nvim-treesitter/nvim-treesitter-textobjects",
-      },
-    },
     cmd = { "TSUpdateSync" },
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter-textobjects",
+      "windwp/nvim-ts-autotag",
+    },
     config = function()
-      require("nvim-treesitter.configs").setup {
+      require("nvim-treesitter.configs").setup({
         ensure_installed = {
           "bash",
           "cmake",
-          "cpp",
           "c",
+          "cpp",
           "diff",
           "gitignore",
           "git_rebase",
           "gitcommit",
           "lua",
+          "luadoc",
           "make",
           "html",
           "json",
           "python",
-          "sxhkdrc",
-          "lua",
-          "luadoc",
           "rust",
           "markdown",
           "markdown_inline",
@@ -38,11 +34,8 @@ return {
         },
         highlight = { enable = true },
         indent = { enable = true },
-        autotag = {
-          enable = true,
-        },
-      }
+        autotag = { enable = true },
+      })
     end,
   },
-
 }

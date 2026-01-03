@@ -1,150 +1,114 @@
-local function lsp_keymaps(bufnr)
-  local opts = { noremap = true, silent = true }
-  local keymap = vim.api.nvim_buf_set_keymap
-  keymap(bufnr, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
-  keymap(bufnr, "n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
-  keymap(bufnr, "n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
-  keymap(bufnr, "n", "gI", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
-  keymap(bufnr, "n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
-  keymap(bufnr, "n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>", opts)
-  keymap(bufnr, "n", "<leader>li", "<cmd>LspInfo<cr>", opts)
-  keymap(bufnr, "n", "<leader>lI", "<cmd>Mason<cr>", opts)
-  keymap(bufnr, "n", "<leader>la", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
-  keymap(bufnr, "n", "<leader>lj", "<cmd>lua vim.diagnostic.goto_next({buffer=0})<cr>", opts)
-  keymap(bufnr, "n", "<leader>lk", "<cmd>lua vim.diagnostic.goto_prev({buffer=0})<cr>", opts)
-  keymap(bufnr, "n", "<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
-  keymap(bufnr, "n", "<leader>ls", "<cmd>lua vim.lsp.buf.signature_help()<CR>", opts)
-  keymap(bufnr, "n", "<leader>lq", "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
-  keymap(bufnr, "n", "<leader>lf", "<cmd>lua vim.lsp.buf.format{ async = true }<cr>", opts)
-end
-
-vim.g.rustaceanvim = {
-  -- LSP configuration
-  server = {
-    on_attach = function(client, bufnr)
-      lsp_keymaps(bufnr)
-    end,
-  },
-}
+local SERVERS = { "clangd", "pyright", "bashls", "jsonls", "lua_ls" }
+local TOOLS = { "stylua", "black", "clang-format" } -- todo cpplint
 
 return {
+  -- LSP (Neovim 0.11+)
   {
     "neovim/nvim-lspconfig",
-    lazy = true,
+    event = { "BufReadPre", "BufNewFile" },
     dependencies = {
-      {
-        "hrsh7th/cmp-nvim-lsp",
-      },
+      "hrsh7th/cmp-nvim-lsp",
     },
+    config = function()
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-    init = function()
-      local lspconfig = require "lspconfig"
+      -- Global defaults for all servers
+      vim.lsp.config("*", {
+        capabilities = capabilities,
+      })
 
-      local on_attach = function(client, bufnr)
-        lsp_keymaps(bufnr)
-        -- require("illuminate").on_attach(client)
+      vim.diagnostic.config({
+        severity_sort = true,
+        float = { border = "rounded" },
+      })
+
+      -- LSP keymaps via LspAttach (buffer-local)
+      local grp = vim.api.nvim_create_augroup("NeilLspKeymaps", { clear = true })
+      vim.api.nvim_create_autocmd("LspAttach", {
+        group = grp,
+        callback = function(args)
+          require("lsp.keymaps").attach(args.buf)
+        end,
+      })
+
+      local rust = vim.g.rustaceanvim
+      if type(rust) ~= "table" then
+        rust = {}
       end
+      rust.server = rust.server or {}
+      rust.server.capabilities = capabilities
+      vim.g.rustaceanvim = rust
 
-      lspconfig["clangd"].setup {
-        cmd = {
-          "clangd",
-          "--query-driver=/nix/store/*-gcc-wrapper-*/bin/g++",
-          "--background-index",
-          "--clang-tidy",
-        },
-        on_attach = on_attach,
-      }
-
-      lspconfig["pyright"].setup {
-        on_attach = on_attach,
-      }
-
-      lspconfig["bashls"].setup {
-        on_attach = on_attach,
-      }
-
-      lspconfig["jsonls"].setup {
-        on_attach = on_attach,
-      }
-
-      lspconfig["lua_ls"].setup {
-        on_attach = on_attach,
-        settings = {
-          Lua = {
-            diagnostics = {
-              globals = { "vim" },
-            },
-            workspace = {
-              library = {
-                [vim.fn.expand "$VIMRUNTIME/lua"] = true,
-                [vim.fn.stdpath "config" .. "/lua"] = true,
-              },
-            },
-            telemetry = {
-              enable = false,
-            },
-          },
-        },
-      }
+      -- Enable servers (configs from lsp/*.lua + after/lsp/*.lua)
+      vim.lsp.enable(SERVERS)
     end,
   },
 
+  -- Mason
   {
     "williamboman/mason.nvim",
     cmd = "Mason",
-    event = "BufReadPre",
-    dependencies = {
-      {
-        "williamboman/mason-lspconfig.nvim",
-        lazy = true,
+    opts = {
+      ui = {
+        icons = {
+          package_installed = "",
+          package_pending = "",
+          package_uninstalled = "",
+        },
       },
     },
-    opts = { ui = { icons = { package_installed = "", package_pending = "", package_uninstalled = "" } } },
     config = function(_, opts)
       require("mason").setup(opts)
-      require("mason-lspconfig").setup {
-        ensure_installed = {
-          "lua_ls",
-          "pyright",
-          "bashls",
-          "jsonls",
-          "clangd",
+    end,
+  },
+
+  {
+    "williamboman/mason-lspconfig.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "williamboman/mason.nvim" },
+    opts = {
+      ensure_installed = SERVERS,
+      automatic_installation = true,
+    },
+    config = function(_, opts)
+      require("mason-lspconfig").setup(opts)
+    end,
+  },
+
+  -- none-ls
+  {
+    "nvimtools/none-ls.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      local nls = require("null-ls")
+      nls.setup({
+        sources = {
+          nls.builtins.formatting.stylua,
+          nls.builtins.formatting.black,
+          nls.builtins.formatting.clang_format,
         },
-      }
+      })
     end,
   },
 
   {
     "jay-babu/mason-null-ls.nvim",
     event = "VeryLazy",
+    dependencies = { "williamboman/mason.nvim", "nvimtools/none-ls.nvim" },
     opts = {
-      ensure_installed = { "stylua", "cpplint", "clang_format", "black" },
+      ensure_installed = TOOLS,
+      automatic_installation = true,
     },
-  },
-
-  {
-    "nvimtools/none-ls.nvim",
-    event = "BufReadPre",
-    dependencies = {
-      {
-        "nvim-lua/plenary.nvim",
-        lazy = true,
-      },
-    },
-    opts = function()
-      local nls = require "null-ls"
-      return {
-        sources = {
-          nls.builtins.formatting.stylua,
-          nls.builtins.formatting.black
-        },
-      }
+    config = function(_, opts)
+      require("mason-null-ls").setup(opts)
     end,
   },
 
+  -- Rust
   {
     "mrcjkb/rustaceanvim",
-    version = "^5", -- Recommended
-    lazy = false, -- This plugin is already lazy
+    version = "^5",
+    ft = { "rust" },
   },
 }

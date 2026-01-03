@@ -1,10 +1,11 @@
 return {
   {
     "akinsho/toggleterm.nvim",
-    event = "VeryLazy",
+    keys = {
+      { "<c-\\>", "<cmd>ToggleTerm<cr>", desc = "Toggle terminal" },
+    },
     opts = {
       size = 10,
-      open_mapping = [[<c-\>]],
       hide_numbers = true,
       shade_terminals = true,
       shading_factor = 2,
@@ -14,24 +15,21 @@ return {
       direction = "tab",
       close_on_exit = true,
       shell = vim.o.shell,
-      float_opts = {
-        border = "curved",
-      },
+      float_opts = { border = "curved" },
     },
-
     config = function(_, opts)
       require("toggleterm").setup(opts)
 
-      function _G.set_terminal_keymaps()
-        local Opts = { noremap = true }
-        -- vim.api.nvim_buf_set_keymap(0, 't', '<esc>', [[<C-\><C-n>]], opts)
-        vim.api.nvim_buf_set_keymap(0, "t", "<C-h>", [[<C-\><C-n><C-W>h]], Opts)
-        vim.api.nvim_buf_set_keymap(0, "t", "<C-j>", [[<C-\><C-n><C-W>j]], Opts)
-        vim.api.nvim_buf_set_keymap(0, "t", "<C-k>", [[<C-\><C-n><C-W>k]], Opts)
-        vim.api.nvim_buf_set_keymap(0, "t", "<C-l>", [[<C-\><C-n><C-W>l]], Opts)
-      end
-
-      vim.cmd "autocmd! TermOpen term://* lua set_terminal_keymaps()"
+      vim.api.nvim_create_autocmd("TermOpen", {
+        pattern = "term://*",
+        callback = function(args)
+          local o = { buffer = args.buf, noremap = true, silent = true }
+          vim.keymap.set("t", "<C-h>", [[<C-\><C-n><C-w>h]], o)
+          vim.keymap.set("t", "<C-j>", [[<C-\><C-n><C-w>j]], o)
+          vim.keymap.set("t", "<C-k>", [[<C-\><C-n><C-w>k]], o)
+          vim.keymap.set("t", "<C-l>", [[<C-\><C-n><C-w>l]], o)
+        end,
+      })
     end,
   },
 }

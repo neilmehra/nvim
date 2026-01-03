@@ -1,30 +1,28 @@
 return {
-
   {
     "nvim-lualine/lualine.nvim",
-    event = { "VimEnter", "InsertEnter", "BufReadPre", "BufAdd", "BufNew", "BufReadPost" },
+    event = "VeryLazy",
+    dependencies = { "jesseleite/nvim-noirbuddy" },
     opts = function()
-      local hide_in_width = function()
+      local function hide_in_width()
         return vim.fn.winwidth(0) > 80
       end
 
       local diff = {
         "diff",
         colored = false,
-        symbols = { added = " ", modified = " ", removed = " " }, -- changes diff symbols
+        symbols = { added = " ", modified = " ", removed = " " },
         cond = hide_in_width,
       }
 
-      local noirbuddy_lualine = require "noirbuddy.plugins.lualine"
+      local noirbuddy_lualine = require("noirbuddy.plugins.lualine")
 
       return {
         options = {
-
           theme = noirbuddy_lualine.theme,
           globalstatus = true,
           disabled_filetypes = { "alpha", "dashboard" },
         },
-
         sections = {
           lualine_a = { "mode" },
           lualine_b = { "branch", "diagnostics" },
