@@ -55,3 +55,40 @@ keymap("n", "<leader>p", paste_image, { desc = "Paste clipboard image" })
 keymap("v", "<", "<gv", opts)
 keymap("v", ">", ">gv", opts)
 
+
+local function sidecar_path(note_path)
+  -- assumes your notes live under ~/kb/notes and kg sidecars under ~/kb/kg/notes
+  local p = note_path
+  p = p:gsub("/notes/", "/kg/notes/")
+  p = p:gsub("%.md$", ".ttl")
+  return p
+end
+
+local function ensure_file(path, lines)
+  local f = io.open(path, "r")
+  if f then f:close(); return end
+  vim.fn.mkdir(vim.fn.fnamemodify(path, ":h"), "p")
+  local wf = io.open(path, "w")
+  for _, l in ipairs(lines) do wf:write(l .. "\n") end
+  wf:close()
+end
+
+keymap("n", "<leader>km", function()
+  local note = vim.fn.expand("%:p")
+  if not note:match("/notes/") or not note:match("%.md$") then
+    print("Not a notes/*.md file")
+    return
+  end
+  local side = sidecar_path(note)
+
+  ensure_file(side, {
+    '@prefix kb:  <https://kb.neil.me/> .',
+    '@prefix rel: <https://kb.neil.me/rel/> .',
+    '@prefix rdfs:<http://www.w3.org/2000/01/rdf-schema#> .',
+    '',
+    '# TODO: fill in kb:note/... and rel:file',
+  })
+
+  vim.cmd("vsplit " .. vim.fn.fnameescape(side))
+end, { desc = "Open KG sidecar for current note" })
+
