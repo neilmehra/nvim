@@ -50,3 +50,15 @@ vim.api.nvim_create_autocmd("BufWritePost", {
     })
   end,
 })
+
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = {
+    "*/kg/*.ttl",
+    "*/kg/**/*.ttl",
+    "*/kb/*.ttl",
+    "*/kb/**/*.ttl",
+  },
+  callback = function()
+    vim.cmd("setfiletype turtle")
+  end,
+})

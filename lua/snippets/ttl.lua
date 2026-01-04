@@ -15,7 +15,8 @@ local function today()
   return os.date("%Y-%m-%d")
 end
 
-local prefixes = fmt([[
+local function prefixes_node()
+  return fmt([[
 @base <https://kb.neil.me/> .
 @prefix kb:  <https://kb.neil.me/> .
 @prefix rel: <https://kb.neil.me/rel/> .
@@ -24,12 +25,13 @@ local prefixes = fmt([[
 
 {}
 ]], { i(1) })
+end
 
 ls.add_snippets("ttl", {
-  s("ttlprefix", prefixes),
+  s("ttlprefix", prefixes_node()),
 
   -- NOTE TTL (graph anchor + file jump + minimal metadata)
-  s("note", fmt([[
+  s("kbnote", fmt([[
 {}<note/{}> a kb:Note ;
   rdfs:label "{}" ;
   rel:file "{}" ;
@@ -40,7 +42,7 @@ ls.add_snippets("ttl", {
   rel:section <section/{}> .{}
 
 ]], {
-    c(1, { t(""), prefixes }),
+    c(1, { t(""), prefixes_node() }),
 
     i(2, f(buf_basename, {})),
     i(3, f(buf_basename, {})),
@@ -57,7 +59,7 @@ ls.add_snippets("ttl", {
   })),
 
   -- CONCEPT TTL
-  s("concept", fmt([[
+  s("kbconcept", fmt([[
 {}<concept/{}> a kb:Concept ;
   rdfs:label "{}" ;
   rel:file "{}" ;
@@ -66,7 +68,7 @@ ls.add_snippets("ttl", {
   rel:tag <subject/{}> .{}
 
 ]], {
-    c(1, { t(""), prefixes }),
+    c(1, { t(""), prefixes_node() }),
 
     i(2, f(buf_basename, {})),
     i(3, "Concept Name"),
@@ -81,7 +83,7 @@ ls.add_snippets("ttl", {
   })),
 
   -- MOC TTL
-  s("moc", fmt([[
+  s("kbmoc", fmt([[
 {}<moc/{}> a kb:MOC ;
   rdfs:label "{}" ;
   rel:file "{}" ;

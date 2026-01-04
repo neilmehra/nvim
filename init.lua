@@ -1,3 +1,9 @@
+vim.filetype.add({
+  extension = {
+    ttl = "turtle",
+  },
+})
+
 -- Disable netrw (oil.nvim)
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1

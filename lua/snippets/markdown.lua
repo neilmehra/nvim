@@ -27,7 +27,7 @@ ls.add_snippets("markdown", {
   s("la", { t("$\\leftarrow$") }),
 
   -- READING / LINEAR NOTE (your template, trimmed to the pieces you’ll actually use)
-  s("note", fmt([[
+  s("kbnote", fmt([[
 ---
 id: {}
 title: {}
@@ -95,7 +95,7 @@ status: {}
   })),
 
   -- CONCEPT NOTE (minimal landing page + easy promotion target)
-  s("concept", fmt([[
+  s("kbconcept", fmt([[
 ---
 id: {}
 title: {}
@@ -155,7 +155,7 @@ status: {}
   })),
 
   -- MOC (pure navigation + inbox; stays small, stays useful)
-  s("moc", fmt([[
+  s("kbmoc", fmt([[
 ---
 id: {}
 title: {}

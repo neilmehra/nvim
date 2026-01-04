@@ -32,6 +32,9 @@ return {
       require("luasnip.loaders.from_lua").load({
         paths = vim.fn.stdpath("config") .. "/lua/snippets",
       })
+
+      -- for turtle files
+      ls.filetype_extend("turtle", { "ttl" })
     end,
   },
 }
