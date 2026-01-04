@@ -10,16 +10,7 @@ return {
     },
     dependencies = {
       "nvim-lua/plenary.nvim",
-      {
-        "ahmedkhalf/project.nvim",
-        opts = {
-          detection_methods = { "pattern" },
-          patterns = { ".git", "Makefile", "package.json" },
-        },
-        config = function(_, opts)
-          require("project_nvim").setup(opts)
-        end,
-      },
+      "ahmedkhalf/project.nvim",
     },
     opts = function()
       local actions = require("telescope.actions")
@@ -85,7 +76,7 @@ return {
     config = function(_, opts)
       local telescope = require("telescope")
       telescope.setup(opts)
-      pcall(telescope.load_extension, "projects")
+      telescope.load_extension("projects")
     end,
   },
 }
