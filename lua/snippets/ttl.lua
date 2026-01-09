@@ -41,15 +41,17 @@ ls.add_snippets("ttl", {
   rel:created "{}"^^xsd:date ;
   rel:tag <status/{}> ;
   rel:tag <subject/{}> ;
-  rel:source <source/{}> ;
-  rel:section <section/{}> .{}
-
+  rel:source <source/{}> .{}
 ]],
       {
         prefixes_node(),
 
-        t(buf_basename()),
-        t(buf_basename()),
+        f(function()
+          return buf_basename()
+        end, {}),
+        f(function()
+          return buf_basename()
+        end, {}),
 
         f(function()
           return "notes/" .. buf_basename() .. ".md"
@@ -59,7 +61,6 @@ ls.add_snippets("ttl", {
         c(1, { t "draft", t "seed", t "evergreen", t "stable" }),
         i(2, "systems"),
         i(3, "aluffi-algebra"),
-        i(4, "aluffi-0.1"),
 
         i(0),
       }
@@ -82,7 +83,9 @@ ls.add_snippets("ttl", {
       {
         prefixes_node(),
 
-        t(buf_basename()),
+        f(function()
+          return buf_basename()
+        end, {}),
         i(1, "Concept Name"),
 
         f(function()
@@ -114,7 +117,9 @@ ls.add_snippets("ttl", {
       {
         prefixes_node(),
 
-        t(buf_basename()),
+        f(function()
+          return buf_basename()
+        end, {}),
         i(1, "MOC: Title"),
 
         f(function()

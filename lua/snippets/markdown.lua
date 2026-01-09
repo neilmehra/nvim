@@ -31,19 +31,18 @@ ls.add_snippets("markdown", {
 ---
 id: {}
 title: {}
-source: {}
-section: {}
 status: {}
+source: <source/{}>
 ---
 
 # Goal
 - {}
 
-# TL;DR (write at end)
-- {}
+# TLDR (write at end)
+- 3–7 bullets: what changed in my brain"),
 
 # Glossary hits (concept stubs)
-- **{}** (<concept/{}>): {}
+- **Group** (<concept/group>): one-line meaning
 
 # Notes (linear as you read)
 ## ...  <!-- e.g. p.12–14 / §1.1 -->
@@ -76,22 +75,16 @@ status: {}
 - <result/result-slug> — statement + proof sketch + uses
 
 ## Examples to save
-- Example - ...
+- Example - ...{}
 
 ]], {
     f(function() return kb_id("note") end, {}),
     i(1, default_title() .. " (reading)"),
-    i(2, "<source/"),
-    i(3, "<section/"),
-    c(4, { t("draft"), t("seed"), t("evergreen"), t("stable") }),
+    i(2),
+    c(3, { t("draft"), t("seed"), t("evergreen"), t("stable") }),
 
-    i(5, "What am I trying to extract?"),
-
-    i(6, "3–7 bullets: what changed in my brain"),
-
-    i(7, "Group"),
-    i(8, "group"),
-    i(9, "one-line meaning"),
+    i(4, "What am I trying to extract?"),
+    i(0),
   })),
 
   -- CONCEPT NOTE (minimal landing page + easy promotion target)
