@@ -17,10 +17,10 @@ return {
         capabilities = capabilities,
       })
 
-      vim.diagnostic.config({
+      vim.diagnostic.config {
         severity_sort = true,
         float = { border = "rounded" },
-      })
+      }
 
       -- LSP keymaps via LspAttach (buffer-local)
       local grp = vim.api.nvim_create_augroup("NeilLspKeymaps", { clear = true })
@@ -39,7 +39,13 @@ return {
       rust.server.capabilities = capabilities
       vim.g.rustaceanvim = rust
 
-      -- Enable servers (configs from lsp/*.lua + after/lsp/*.lua)
+      vim.lsp.config("clangd", {
+        on_attach = function(client, _bufnr)
+          client.server_capabilities.documentFormattingProvider = false
+          client.server_capabilities.documentRangeFormattingProvider = false
+        end,
+      })
+
       vim.lsp.enable(SERVERS)
     end,
   },
@@ -49,6 +55,7 @@ return {
     "williamboman/mason.nvim",
     cmd = "Mason",
     opts = {
+      PATH = "append",
       ui = {
         icons = {
           package_installed = "",
@@ -81,14 +88,15 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
-      local nls = require("null-ls")
-      nls.setup({
+      local nls = require "null-ls"
+      nls.setup {
+        debug = true,
         sources = {
           nls.builtins.formatting.stylua,
           nls.builtins.formatting.black,
           nls.builtins.formatting.clang_format,
         },
-      })
+      }
     end,
   },
 
