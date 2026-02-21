@@ -5,10 +5,11 @@ local opts = { silent = true }
 keymap({ "n", "v" }, "<Space>", "<Nop>", opts)
 
 -- Window navigation
-keymap("n", "<C-h>", "<C-w>h", opts)
-keymap("n", "<C-j>", "<C-w>j", opts)
-keymap("n", "<C-k>", "<C-w>k", opts)
-keymap("n", "<C-l>", "<C-w>l", opts)
+-- tmux plugin maps this to work w/ tmux panes asw
+-- keymap("n", "<C-h>", "<C-w>h", opts)
+-- keymap("n", "<C-j>", "<C-w>j", opts)
+-- keymap("n", "<C-k>", "<C-w>k", opts)
+-- keymap("n", "<C-l>", "<C-w>l", opts)
 
 -- Resize
 keymap("n", "<C-Up>", ":resize -2<CR>", opts)
