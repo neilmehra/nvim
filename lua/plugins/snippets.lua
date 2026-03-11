@@ -24,28 +24,23 @@ return {
     config = function(_, opts)
       local ls = require "luasnip"
       ls.config.set_config(opts)
-
-      -- Friendly snippets
       require("luasnip.loaders.from_vscode").lazy_load()
 
-      -- custom snippets
-      require("luasnip.loaders.from_lua").load {
-        paths = vim.fn.stdpath "config" .. "/lua/snippets",
-      }
+      -- KB snippets (self-registering, call add_snippets internally)
+      require "kb.snippets.turtle"
+      require "kb.snippets.markdown"
 
       vim.keymap.set({ "i", "s" }, "<C-l>", function()
         if ls.choice_active() then
           ls.change_choice(1)
         end
       end, { silent = true, desc = "LuaSnip next choice" })
-
       vim.keymap.set({ "i", "s" }, "<C-h>", function()
         if ls.choice_active() then
           ls.change_choice(-1)
         end
       end, { silent = true, desc = "LuaSnip prev choice" })
 
-      -- for turtle files
       ls.filetype_extend("turtle", { "ttl" })
     end,
   },

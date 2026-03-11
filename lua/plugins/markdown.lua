@@ -9,21 +9,15 @@ return {
     },
   },
   {
-    "iamcco/markdown-preview.nvim",
-    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    "selimacerbas/markdown-preview.nvim",
     ft = { "markdown" },
-    build = function()
-      vim.fn["mkdp#util#install"]()
-    end,
+    dependencies = { "selimacerbas/live-server.nvim" },
     config = function()
-      vim.cmd [[do FileType]]
-      vim.cmd [[
-         function OpenMarkdownPreview (url)
-            let cmd = "google-chrome-stable --new-window " . shellescape(a:url) . " &"
-            silent call system(cmd)
-         endfunction
-      ]]
-      vim.g.mkdp_browserfunc = "OpenMarkdownPreview"
+      require("markdown_preview").setup {
+        port = 8421,
+        open_browser = true,
+        debounce_ms = 300,
+      }
     end,
   },
 }

@@ -57,6 +57,7 @@ return {
           button("s", ">scratchpad", "<cmd>e ~/neil/scratchpad<cr>"),
           button("t", ">live grep", "<cmd>Telescope live_grep<cr>"),
           button("c", ">config", "<cmd>e ~/dotfiles/nvim/init.lua<cr>"),
+          button("k", ">kb", "<cmd>cd ~/kb | edit ~/kb/inbox.md<cr>"),
           button("q", ">quit", "<cmd>qa<cr>"),
         },
         opts = { spacing = 0 },

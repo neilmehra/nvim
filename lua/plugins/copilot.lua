@@ -5,14 +5,14 @@ return {
     event = "InsertEnter",
     opts = {
       panel = {
-        enabled = true,
+        enabled = false,
         auto_refresh = false,
         keymap = {
           jump_prev = "[[",
           jump_next = "]]",
           accept = "<CR>",
           refresh = "gr",
-          open = "<M-CR>",
+          open = "<M-l>", -- idk do i have to change this for other thing to work?
         },
       },
       suggestion = {
@@ -20,7 +20,9 @@ return {
         auto_trigger = true,      -- set false if you hate pop-in suggestions
         debounce = 75,
         keymap = {
-          accept = "<M-l>",       -- Alt+l to accept
+          -- alt+l conflicts with tmux 
+          -- accept = "<M-L>",       -- Alt+l to accept
+          accept = "<M-CR>",
           accept_word = "<M-w>",
           accept_line = "<M-L>",
           next = "<M-]>",
