@@ -1,16 +1,14 @@
--- TODO: https://github.com/DrKJeff16/project.nvim?tab=readme-ov-file#lazynvim
 return {
   {
-    "ahmedkhalf/project.nvim",
-    event = "VimEnter", -- or {"BufReadPre","BufNewFile"}
+    "DrKJeff16/project.nvim",
+    event = "VimEnter",
     opts = {
-      detection_methods = { "pattern", "lsp" },
+      -- lsp detection is enabled by default; patterns covers the rest
       patterns = { ".git", "Makefile", "package.json" },
       silent_chdir = true,
     },
     config = function(_, opts)
-      require("project_nvim").setup(opts)
+      require("project").setup(opts)
     end,
   },
 }
-

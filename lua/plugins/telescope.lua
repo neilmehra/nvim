@@ -10,7 +10,7 @@ return {
     },
     dependencies = {
       "nvim-lua/plenary.nvim",
-      "ahmedkhalf/project.nvim",
+      "DrKJeff16/project.nvim",
     },
     opts = function()
       local actions = require("telescope.actions")

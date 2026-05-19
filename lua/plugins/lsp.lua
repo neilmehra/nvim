@@ -75,7 +75,7 @@ return {
     dependencies = { "williamboman/mason.nvim" },
     opts = {
       ensure_installed = SERVERS,
-      automatic_installation = true,
+      automatic_enable = true,
     },
     config = function(_, opts)
       require("mason-lspconfig").setup(opts)
