@@ -42,7 +42,7 @@ return {
       hl("LineNr",        { fg = C.mute })
       hl("CursorLine",    { bg = "#0a0510" })
       hl("CursorLineNr",  { fg = C.accent, bold = true })
-      hl("Visual",        { bg = "#1a0d20" })
+      hl("Visual",        { bg = "#4a1f3d" })
       hl("Search",        { fg = C.bg, bg = C.accent })
       hl("CurSearch",     { fg = C.bg, bg = C.rose, bold = true })
       hl("MatchParen",    { fg = C.accent, bold = true, underline = true })
