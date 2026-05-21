@@ -17,10 +17,26 @@ return {
         capabilities = capabilities,
       })
 
-      vim.diagnostic.config {
+      vim.diagnostic.config({
         severity_sort = true,
-        float = { border = "rounded" },
-      }
+        underline = { severity = { min = vim.diagnostic.severity.WARN } },
+        virtual_text = false,                              -- inline noise off
+        virtual_lines = { current_line = true },           -- show diagnostic only on the cursor line, below
+        float = {
+          border = "rounded",
+          source = true,
+          header = "",
+          prefix = "",
+        },
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = "●",
+            [vim.diagnostic.severity.WARN]  = "●",
+            [vim.diagnostic.severity.INFO]  = "●",
+            [vim.diagnostic.severity.HINT]  = "●",
+          },
+        },
+      })
 
       -- LSP keymaps via LspAttach (buffer-local)
       local grp = vim.api.nvim_create_augroup("NeilLspKeymaps", { clear = true })

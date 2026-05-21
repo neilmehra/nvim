@@ -1,13 +1,26 @@
 return {
   {
-    "MeanderingProgrammer/render-markdown.nvim",
+    "OXY2DEV/markview.nvim",
     ft = { "markdown", "vimwiki" },
-    dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
+    dependencies = {
+      "nvim-tree/nvim-web-devicons",
+    },
     opts = {
-      latex = { enabled = false },
-      win_options = { conceallevel = { rendered = 2 } },
+      preview = {
+        filetypes = { "markdown", "md", "vimwiki" },
+        ignore_buftypes = { "nofile", "terminal" },
+        modes = { "n", "no", "c" },
+        hybrid_modes = { "i" },
+        callbacks = {
+          on_enable = function(_, win)
+            vim.wo[win].conceallevel = 2
+            vim.wo[win].concealcursor = "nc"
+          end,
+        },
+      },
     },
   },
+
   {
     "selimacerbas/markdown-preview.nvim",
     ft = { "markdown" },

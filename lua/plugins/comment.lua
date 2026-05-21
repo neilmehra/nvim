@@ -2,28 +2,17 @@ return {
   {
     "numToStr/Comment.nvim",
     event = { "BufReadPost", "BufNewFile" },
+    dependencies = { "JoosepAlviste/nvim-ts-context-commentstring" },
     keys = {
-      {
-        "<leader>/",
-        function() require("Comment.api").toggle.linewise.current() end,
-        desc = "Toggle comment (line)",
-      },
-      {
-        "<leader>/",
-        function() require("Comment.api").toggle.linewise(vim.fn.visualmode()) end,
-        mode = "x",
-        desc = "Toggle comment (selection)",
-      },
-    },
-    dependencies = {
-      "JoosepAlviste/nvim-ts-context-commentstring",
+      { "<leader>/", "<Plug>(comment_toggle_linewise_current)", mode = "n", desc = "Toggle comment (line)" },
+      { "<leader>/", "<Plug>(comment_toggle_linewise_visual)",  mode = "x", desc = "Toggle comment (selection)" },
     },
     opts = function()
-      local ok, integ = pcall(require, "ts_context_commentstring.integrations.comment_nvim")
-      if ok then
-        return { pre_hook = integ.create_pre_hook() }
-      end
-      return {}
+      vim.g.skip_ts_context_commentstring_module = true
+      require("ts_context_commentstring").setup({ enable_autocmd = false })
+      return {
+        pre_hook = require("ts_context_commentstring.integrations.comment_nvim").create_pre_hook(),
+      }
     end,
   },
 }

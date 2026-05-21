@@ -1,36 +1,32 @@
+-- ultra-minimal status: one dim line. mode lives in the cursor shape,
+-- file lives in incline, position is the only number on the right.
 return {
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    dependencies = { "jesseleite/nvim-noirbuddy" },
     opts = function()
-      local function hide_in_width()
-        return vim.fn.winwidth(0) > 80
-      end
-
       local diff = {
         "diff",
         colored = false,
-        symbols = { added = " ", modified = " ", removed = " " },
-        cond = hide_in_width,
+        symbols = { added = " ", modified = " ", removed = " " },
+        cond = function() return vim.fn.winwidth(0) > 80 end,
       }
-
-      local noirbuddy_lualine = require("noirbuddy.plugins.lualine")
 
       return {
         options = {
-          theme = noirbuddy_lualine.theme,
+          theme = "pywal16-nvim",
           globalstatus = true,
-          disabled_filetypes = { "alpha", "dashboard" },
+          disabled_filetypes = { "alpha", "dashboard", "noice" },
+          component_separators = "",
+          section_separators = "",
         },
         sections = {
-          lualine_a = { "mode" },
-          lualine_b = { "branch", "diagnostics" },
-          lualine_c = { "buffers" },
-          lualine_d = { "filename" },
+          lualine_a = {},                    -- no mode label (cursor shape does it)
+          lualine_b = { { "branch", icon = "" }, "diagnostics" },
+          lualine_c = {},                    -- filename owned by incline
           lualine_x = { diff },
-          lualine_y = { "progress" },
-          lualine_z = { "location" },
+          lualine_y = {},
+          lualine_z = { { "location", padding = { left = 1, right = 1 } } },
         },
         inactive_sections = {},
       }
