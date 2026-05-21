@@ -16,8 +16,8 @@ return {
         },
       },
       suggestion = {
-        enabled = true,
-        auto_trigger = true,      -- set false if you hate pop-in suggestions
+        enabled = false,
+        auto_trigger = false,     -- set false if you hate pop-in suggestions
         debounce = 75,
         keymap = {
           -- alt+l conflicts with tmux 

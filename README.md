@@ -11,5 +11,4 @@
 - [ripgrep](https://github.com/BurntSushi/ripgrep)
 - a [nerd font](https://github.com/ryanoasis/nerd-fonts)
 - [rust-analyzer](https://rust-analyzer.github.io/)
-- sqlite3 for [time-tracker.nvim](https://github.com/3rd/time-tracker.nvim)
 
