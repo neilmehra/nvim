@@ -2,95 +2,37 @@
 local M = {}
 
 M.root = vim.fn.expand("~/kb")
+M.endpoint = "http://127.0.0.1:7878"
+M.viewer_url = "http://127.0.0.1:7879"
 
-function M.slug_to_label(slug)
-  return (slug:gsub("%-", " "):gsub("^%l", string.upper))
+---@param slug string
+---@return string md path
+---@return string ttl path
+function M.paths(slug)
+  return M.root .. "/entities/" .. slug .. ".md",
+         M.root .. "/kg/entities/" .. slug .. ".ttl"
 end
 
-local dirs = {
-  note    = { md = "notes",    ttl = "kg/notes" },
-  concept = { md = "concepts", ttl = "kg/concepts" },
-  moc     = { md = "mocs",    ttl = "kg/mocs" },
-  result  = { md = "results",  ttl = "kg/results" },
-}
-
----@param kind "note"|"concept"|"moc"
-function M.create(kind)
-  local slug = vim.fn.input(kind .. " slug: ")
-  if slug == "" then return end
-
-  local d = dirs[kind]
-  local md_path  = M.root .. "/" .. d.md  .. "/" .. slug .. ".md"
-  local ttl_path = M.root .. "/" .. d.ttl .. "/" .. slug .. ".ttl"
-
-  vim.fn.mkdir(vim.fn.fnamemodify(md_path, ":h"), "p")
-  vim.fn.mkdir(vim.fn.fnamemodify(ttl_path, ":h"), "p")
-
-  for _, p in ipairs({ md_path, ttl_path }) do
-    if vim.fn.filereadable(p) == 0 then
-      local f = io.open(p, "w"); f:close()
-    end
-  end
-
-  vim.cmd("edit " .. vim.fn.fnameescape(md_path))
-  vim.cmd("vsplit " .. vim.fn.fnameescape(ttl_path))
-
-  vim.schedule(function()
-    if vim.api.nvim_buf_line_count(0) == 1
-      and vim.api.nvim_buf_get_lines(0, 0, 1, false)[1] == "" then
-      local snips = require("luasnip").get_snippets("turtle") or {}
-      local target = "kb" .. kind
-      for _, snip in ipairs(snips) do
-        if snip.trigger == target then
-          require("luasnip").snip_expand(snip)
-          return
-        end
-      end
-    end
-  end)
-end
-
-function M.open_sidecar()
-  local p = vim.fn.expand("%:p")
-  if not p:match("%.md$") then
-    vim.notify("Not an .md file", vim.log.levels.WARN)
+---Open the md and ttl for a given slug as a vsplit (md left, ttl right).
+---@param slug string
+function M.open_entity(slug)
+  local md, ttl = M.paths(slug)
+  if vim.fn.filereadable(md) == 0 and vim.fn.filereadable(ttl) == 0 then
+    vim.notify("No entity '" .. slug .. "'", vim.log.levels.WARN)
     return
   end
-  -- Detect which top-level dir: concepts/, mocs/, results/, notes/
-  local side
-  for _, kind in ipairs({ "concepts", "mocs", "results", "notes" }) do
-    local pattern = "/" .. kind .. "/"
-    if p:match(pattern) then
-      side = p:gsub(pattern, "/kg/" .. kind .. "/"):gsub("%.md$", ".ttl")
-      break
-    end
-  end
-  if not side then
-    vim.notify("Not under a KB directory", vim.log.levels.WARN)
-    return
-  end
-  if vim.fn.filereadable(side) == 0 then
-    vim.fn.mkdir(vim.fn.fnamemodify(side, ":h"), "p")
-    local f = io.open(side, "w"); f:close()
-  end
-  vim.cmd("vsplit " .. vim.fn.fnameescape(side))
+  vim.cmd("edit " .. vim.fn.fnameescape(md))
+  vim.cmd("vsplit " .. vim.fn.fnameescape(ttl))
 end
 
+---Jump between the .md and its .ttl sidecar (replaces current buffer).
 function M.jump_sidecar()
   local p = vim.fn.expand("%:p")
   local target
-  if p:match("%.ttl$") then
-    -- kg/concepts/foo.ttl → concepts/foo.md
-    target = p:gsub("/kg/", "/"):gsub("%.ttl$", ".md")
-  elseif p:match("%.md$") then
-    -- concepts/foo.md → kg/concepts/foo.ttl
-    for _, kind in ipairs({ "concepts", "mocs", "results", "notes" }) do
-      local pattern = "/" .. kind .. "/"
-      if p:match(pattern) then
-        target = p:gsub(pattern, "/kg/" .. kind .. "/"):gsub("%.md$", ".ttl")
-        break
-      end
-    end
+  if p:match("/kg/entities/") and p:match("%.ttl$") then
+    target = p:gsub("/kg/entities/", "/entities/"):gsub("%.ttl$", ".md")
+  elseif p:match("/entities/") and p:match("%.md$") then
+    target = p:gsub("/entities/", "/kg/entities/"):gsub("%.md$", ".ttl")
   end
   if target and vim.fn.filereadable(target) == 1 then
     vim.cmd("edit " .. vim.fn.fnameescape(target))
@@ -99,16 +41,26 @@ function M.jump_sidecar()
   end
 end
 
-function M.capture_stub(kind)
-  kind = kind or "concept"
-  local slug = vim.fn.input("Stub " .. kind .. ": ")
-  if slug == "" then return end
-  local oneliner = vim.fn.input("one-liner: ")
-  local inbox = M.root .. "/inbox.md"
-  local f = io.open(inbox, "a")
-  f:write(string.format("- [ ] `<%s/%s>` — %s\n", kind, slug, oneliner))
-  f:close()
-  vim.notify("Captured: " .. slug, vim.log.levels.INFO)
+---Close both md and ttl buffers of the current entity together.
+function M.close_pair()
+  local p = vim.fn.expand("%:p")
+  local other
+  if p:match("/kg/entities/.+%.ttl$") then
+    other = p:gsub("/kg/entities/", "/entities/"):gsub("%.ttl$", ".md")
+  elseif p:match("/entities/.+%.md$") then
+    other = p:gsub("/entities/", "/kg/entities/"):gsub("%.md$", ".ttl")
+  end
+  local cur = vim.api.nvim_get_current_buf()
+  local pair_buf
+  if other then
+    for _, b in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_loaded(b) and vim.api.nvim_buf_get_name(b) == other then
+        pair_buf = b; break
+      end
+    end
+  end
+  if pair_buf then vim.cmd("bdelete " .. pair_buf) end
+  vim.cmd("bdelete " .. cur)
 end
 
 return M

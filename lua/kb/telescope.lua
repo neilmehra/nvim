@@ -1,29 +1,19 @@
 -- lua/kb/telescope.lua
+-- Generic entity picker. The callback receives either a selection table or nil.
+
 local M = {}
 
----@param kind "concept"|"note"|"moc"|"source"|"result"
-function M.pick_entity(kind)
-  kind = kind or "concept"
-  local kb_root = require("kb").root
-
-  local scan = {
-    concept = "kg/concepts",
-    note    = "kg/notes",
-    moc     = "kg/mocs",
-    source  = "kg/sources",
-    result  = "kg/results",
-  }
-  local dir = kb_root .. "/" .. (scan[kind] or "kg/concepts")
-  local files = vim.fn.globpath(dir, "*.ttl", false, true)
-  local slugs = {}
-  for _, f in ipairs(files) do
-    table.insert(slugs, vim.fn.fnamemodify(f, ":t:r"))
-  end
-
-  if #slugs == 0 then
-    vim.notify("No " .. kind .. " entities found", vim.log.levels.WARN)
-    return
-  end
+---Show a picker over entries. Callback receives:
+---  nil                                  if user cancelled (Esc)
+---  { slug = "...", label = "..." }      on selection
+---  { is_new = true, label = <query> }   on <C-n> when opts.allow_new is true
+---@param prompt string
+---@param entries table[]  list of {slug, label}
+---@param opts {allow_new: boolean}|nil
+---@param cb fun(result: table|nil)
+function M.pick(prompt, entries, opts, cb)
+  opts = opts or {}
+  if entries == nil then entries = {} end
 
   local pickers = require("telescope.pickers")
   local finders = require("telescope.finders")
@@ -32,20 +22,52 @@ function M.pick_entity(kind)
   local action_state = require("telescope.actions.state")
 
   pickers.new({}, {
-    prompt_title = "KB: " .. kind,
-    finder = finders.new_table({ results = slugs }),
+    prompt_title = prompt,
+    finder = finders.new_table({
+      results = entries,
+      entry_maker = function(e)
+        return {
+          value = e,
+          display = e.label or e.slug or "(unknown)",
+          ordinal = (e.label or "") .. " " .. (e.slug or ""),
+        }
+      end,
+    }),
     sorter = conf.generic_sorter({}),
-    attach_mappings = function(prompt_bufnr)
+    attach_mappings = function(prompt_bufnr, map)
       actions.select_default:replace(function()
-        actions.close(prompt_bufnr)
         local sel = action_state.get_selected_entry()
-        if sel then
-          vim.api.nvim_put({ "<" .. kind .. "/" .. sel[1] .. ">" }, "", true, true)
+        actions.close(prompt_bufnr)
+        if sel and sel.value then
+          cb({ slug = sel.value.slug, label = sel.value.label })
+        else
+          cb(nil)
         end
       end)
+      if opts.allow_new then
+        map({ "i", "n" }, "<C-n>", function()
+          local query = action_state.get_current_line()
+          actions.close(prompt_bufnr)
+          if query and query ~= "" then
+            cb({ label = query, is_new = true })
+          else
+            cb(nil)
+          end
+        end)
+      end
       return true
     end,
   }):find()
+end
+
+---Insert `<entity/slug>` at cursor (for `<C-k>` insert-mode binding).
+function M.insert_entity_ref()
+  local Sparql = require("kb.sparql")
+  M.pick("KB: insert entity ref", Sparql.list_entities(), {}, function(res)
+    if res and res.slug then
+      vim.api.nvim_put({ "<entity/" .. res.slug .. ">" }, "", true, true)
+    end
+  end)
 end
 
 return M

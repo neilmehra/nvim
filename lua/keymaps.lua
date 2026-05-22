@@ -4,12 +4,8 @@ local opts = { silent = true }
 -- Make <Space> do nothing in normal/visual so it acts as leader cleanly
 keymap({ "n", "v" }, "<Space>", "<Nop>", opts)
 
--- Window navigation
--- tmux plugin maps this to work w/ tmux panes asw
--- keymap("n", "<C-h>", "<C-w>h", opts)
--- keymap("n", "<C-j>", "<C-w>j", opts)
--- keymap("n", "<C-k>", "<C-w>k", opts)
--- keymap("n", "<C-l>", "<C-w>l", opts)
+-- Window navigation: <C-h/j/k/l> handled by smart-splits.nvim
+-- (works over SSH without tmux; integrates with tmux when present)
 
 -- Resize
 keymap("n", "<C-Up>", ":resize -2<CR>", opts)
