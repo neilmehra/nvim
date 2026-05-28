@@ -30,22 +30,22 @@ local function current_ttl_path()
   return nil
 end
 
+local function slug_from_ttl(ttl_path)
+  return ttl_path:match("/kg/entities/(.-)%.ttl$")
+end
+
 local function append_edge(ttl_path, predicate, target_slug)
+  local slug = slug_from_ttl(ttl_path)
+  if not slug then return false end
   local f = io.open(ttl_path, "r")
   if not f then return false end
   local content = f:read("*a"); f:close()
   local pred_token = short(predicate)
   if pred_token:match("^rel/") then pred_token = "rel:" .. pred_token:sub(5) end
-  local snippet = string.format(";\n  %s <entity/%s> .", pred_token, target_slug)
-  local placeholder = "@@EDGEPLACEHOLDER@@"
-  local new = content:gsub("(%.)(%s*)$", placeholder .. "%2", 1)
-  if not new:find(placeholder, 1, true) then
-    new = content .. "\n# (parse failure, appended at end)\n" ..
-      string.format("<entity/PARSE_ERROR> %s <entity/%s> .\n", pred_token, target_slug)
-  else
-    new = new:gsub(placeholder, (snippet:gsub("%%", "%%%%")), 1)
-  end
-  f = io.open(ttl_path, "w"); f:write(new); f:close()
+  if not content:match("\n$") then content = content .. "\n" end
+  content = content .. string.format("<entity/%s> %s <entity/%s> .\n",
+                                     slug, pred_token, target_slug)
+  f = io.open(ttl_path, "w"); f:write(content); f:close()
   return true
 end
 

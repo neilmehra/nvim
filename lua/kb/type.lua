@@ -17,6 +17,10 @@ local function current_ttl_path()
   return nil
 end
 
+local function slug_from_ttl(ttl_path)
+  return ttl_path:match("/kg/entities/(.-)%.ttl$")
+end
+
 local function ensure_category(slug, label)
   local ttl = kb.root .. "/kg/entities/" .. slug .. ".ttl"
   if vim.fn.filereadable(ttl) == 1 then return end
@@ -33,21 +37,18 @@ local function ensure_category(slug, label)
   local f = io.open(ttl, "w"); f:write(table.concat(lines, "\n")); f:close()
 end
 
----Append `a <entity/{type_slug}> .` to the entity TTL at `ttl_path`.
----Converts the last `.` (entity-block terminator) into `;` and adds new clause.
+---Append a fresh top-level statement `<entity/{slug}> a <entity/{type_slug}> .`
+---to the TTL. TTL unions multiple statements about the same subject, so we
+---don't have to mutate the existing block.
 local function append_type_edge(ttl_path, type_slug)
+  local slug = slug_from_ttl(ttl_path)
+  if not slug then return false end
   local f = io.open(ttl_path, "r")
   if not f then return false end
   local content = f:read("*a"); f:close()
-  local replacement = string.format(";\n  a <entity/%s> .", type_slug)
-  local placeholder = "@@TYPEPLACEHOLDER@@"
-  local new = content:gsub("(%.)(%s*)$", placeholder .. "%2", 1)
-  if not new:find(placeholder, 1, true) then
-    new = content .. string.format("\n<entity/PARSE_ERROR> a <entity/%s> .\n", type_slug)
-  else
-    new = new:gsub(placeholder, (replacement:gsub("%%", "%%%%")), 1)
-  end
-  f = io.open(ttl_path, "w"); f:write(new); f:close()
+  if not content:match("\n$") then content = content .. "\n" end
+  content = content .. string.format("<entity/%s> a <entity/%s> .\n", slug, type_slug)
+  f = io.open(ttl_path, "w"); f:write(content); f:close()
   return true
 end
 
