@@ -6,6 +6,22 @@ if M.enabled == nil then M.enabled = vim.fn.isdirectory(M.root) == 1 end
 M.endpoint = "http://127.0.0.1:7878"
 M.viewer_url = "http://127.0.0.1:7879"
 
+---Reload oxigraph from on-disk .ttl files. Async, silent on success.
+---Call after writing any .ttl so the SPARQL endpoint reflects new state.
+---Fires `User KBSynced` autocmd on success so listeners (e.g. conceal cache)
+---can invalidate.
+function M.sync()
+  vim.system({ M.root .. "/bin/kg-sync" }, { text = true }, function(res)
+    vim.schedule(function()
+      if res.code ~= 0 then
+        vim.notify("kg-sync failed: " .. (res.stderr or ""), vim.log.levels.ERROR)
+      else
+        vim.api.nvim_exec_autocmds("User", { pattern = "KBSynced" })
+      end
+    end)
+  end)
+end
+
 ---@param slug string
 ---@return string md path
 ---@return string ttl path

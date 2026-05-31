@@ -70,10 +70,12 @@ function M.add_type()
       ensure_category(s, res.label)
       append_type_edge(ttl, s)
       vim.cmd("checktime")
+      kb.sync()
       vim.notify("Added new type: " .. s)
     else
       append_type_edge(ttl, res.slug)
       vim.cmd("checktime")
+      kb.sync()
       vim.notify("Added type: " .. res.slug)
     end
   end)

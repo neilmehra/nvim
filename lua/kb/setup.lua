@@ -18,6 +18,26 @@ vim.api.nvim_create_autocmd("BufNewFile", {
   end,
 })
 
+-- ── Autocmd: re-sync oxigraph whenever a .ttl is written ─────
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = "*/kb/kg/**/*.ttl",
+  callback = function() kb.sync() end,
+})
+
+-- ── Autocmd: inline-label rendering for <entity/SLUG> tokens ─
+vim.api.nvim_create_autocmd({ "BufReadPost", "InsertLeave", "TextChanged" }, {
+  pattern = "*/kb/entities/*.md",
+  callback = function(args) require("kb.conceal").attach(args.buf) end,
+})
+vim.api.nvim_create_autocmd("User", {
+  pattern = "KBSynced",
+  callback = function()
+    local Conceal = require("kb.conceal")
+    Conceal.invalidate()
+    Conceal.refresh_all()
+  end,
+})
+
 -- ── Keymaps ──────────────────────────────────────────────────
 local function map(mode, lhs, rhs, desc)
   vim.keymap.set(mode, lhs, rhs, { silent = true, desc = desc })
@@ -25,6 +45,7 @@ end
 
 map("n", "<leader>K",  function() require("kb.create").create() end,        "KB: new entity")
 map("n", "<leader>kn", function() require("kb.telescope").find_entity() end, "KB: find entity by name")
+map("n", "<leader>kS", function() require("kb").sync() end,                  "KB: sync oxigraph")
 map("n", "<leader>kt", function() require("kb.type").add_type() end,        "KB: add type")
 map("n", "<leader>ke", function() require("kb.edge").add_edge() end,        "KB: add edge")
 map("n", "<leader>kj", function() require("kb").jump_sidecar() end,         "KB: jump md ↔ ttl")

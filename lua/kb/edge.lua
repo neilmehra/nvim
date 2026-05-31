@@ -2,15 +2,20 @@
 -- Two-stage picker: relation, then target entity. Appends edge to current TTL.
 
 local M = {}
+local kb = require("kb")
+local Slug = require("kb.slug")
 local Sparql = require("kb.sparql")
 local Picker = require("kb.telescope")
 
 local COMMON_RELATIONS = {
   "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+  "https://kb.neil.me/rel/specializes",
+  "https://kb.neil.me/rel/generalizes",
+  "https://kb.neil.me/rel/example",
+  "https://kb.neil.me/rel/source",
+  "https://kb.neil.me/rel/requires",
   "https://kb.neil.me/rel/about",
   "https://kb.neil.me/rel/explains",
-  "https://kb.neil.me/rel/requires",
-  "https://kb.neil.me/rel/source",
   "https://kb.neil.me/rel/contradicts",
   "https://kb.neil.me/rel/includes",
   "https://kb.neil.me/rel/influences",
@@ -68,15 +73,26 @@ function M.add_edge()
     rel_entries[#rel_entries + 1] = { slug = p, label = short(p) }
   end
 
-  Picker.pick("KB: relation", rel_entries, {}, function(res)
-    if not res or not res.slug then return end
-    local predicate = res.slug
+  Picker.pick("KB: relation (Ctrl-n: new from query)", rel_entries,
+              { allow_new = true }, function(res)
+    if not res then return end
+    local predicate
+    if res.is_new then
+      local s = Slug.normalize(res.label)
+      if s == "" then
+        vim.notify("Empty relation name", vim.log.levels.WARN); return
+      end
+      predicate = "https://kb.neil.me/rel/" .. s
+    else
+      predicate = res.slug
+    end
 
     local entities = Sparql.list_entities()
     Picker.pick("KB: target", entities, {}, function(res2)
       if not res2 or not res2.slug then return end
       append_edge(ttl, predicate, res2.slug)
       vim.cmd("checktime")
+      kb.sync()
       vim.notify(string.format("Added edge: %s → %s", short(predicate), res2.slug))
     end)
   end)
