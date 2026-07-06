@@ -2,6 +2,11 @@
 local M = {}
 
 M.root = vim.fn.expand("~/kb")
+-- Single switch for all KB tooling (setup keymaps + snippets). Auto-enables when
+-- ~/kb exists, so it's on here and silently off on machines without the repo.
+-- Force it with vim.g.kb_enabled = true/false in init.lua before requiring anything.
+M.enabled = vim.g.kb_enabled
+if M.enabled == nil then M.enabled = vim.fn.isdirectory(M.root) == 1 end
 M.endpoint = "http://127.0.0.1:7878"
 M.viewer_url = "http://127.0.0.1:7879"
 

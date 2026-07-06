@@ -52,7 +52,6 @@ return {
         type = "group",
         val = {
           button("f", ">find file", "<cmd>Telescope find_files<cr>"),
-          button("p", ">project", "<cmd>Telescope projects<cr>"),
           button("r", ">recent files", ":Telescope oldfiles <CR>"),
           button("s", ">scratchpad", "<cmd>e ~/neil/scratchpad<cr>"),
           button("t", ">live grep", "<cmd>Telescope live_grep<cr>"),

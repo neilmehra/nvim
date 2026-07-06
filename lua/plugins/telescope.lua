@@ -5,12 +5,10 @@ return {
     keys = {
       { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
       { "<leader>ft", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
-      { "<leader>fp", "<cmd>Telescope projects<cr>", desc = "Projects" },
       { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
     },
     dependencies = {
       "nvim-lua/plenary.nvim",
-      "DrKJeff16/project.nvim",
     },
     opts = function()
       local actions = require("telescope.actions")
@@ -76,7 +74,6 @@ return {
     config = function(_, opts)
       local telescope = require("telescope")
       telescope.setup(opts)
-      telescope.load_extension("projects")
     end,
   },
 }

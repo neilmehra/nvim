@@ -3,6 +3,9 @@
 
 local kb = require("kb")
 
+-- No-op on machines without a KB (see kb/init.lua M.enabled).
+if not kb.enabled then return end
+
 -- ── Autocmd: inject TTL prefixes in new files under kg/ ──────
 vim.api.nvim_create_autocmd("BufNewFile", {
   pattern = "*/kb/kg/**/*.ttl",

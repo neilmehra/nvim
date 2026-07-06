@@ -26,9 +26,11 @@ return {
       ls.config.set_config(opts)
       require("luasnip.loaders.from_vscode").lazy_load()
 
-      -- KB snippets (self-registering, call add_snippets internally)
-      require "kb.snippets.turtle"
-      require "kb.snippets.markdown"
+      -- KB snippets (self-registering, call add_snippets internally) — only when KB is enabled
+      if require("kb").enabled then
+        require "kb.snippets.turtle"
+        require "kb.snippets.markdown"
+      end
 
       vim.keymap.set({ "i", "s" }, "<C-l>", function()
         if ls.choice_active() then
