@@ -1,10 +1,6 @@
--- lua/kb/init.lua
 local M = {}
 
 M.root = vim.fn.expand("~/kb")
--- Single switch for all KB tooling (setup keymaps + snippets). Auto-enables when
--- ~/kb exists, so it's on here and silently off on machines without the repo.
--- Force it with vim.g.kb_enabled = true/false in init.lua before requiring anything.
 M.enabled = vim.g.kb_enabled
 if M.enabled == nil then M.enabled = vim.fn.isdirectory(M.root) == 1 end
 M.endpoint = "http://127.0.0.1:7878"
@@ -18,7 +14,6 @@ function M.paths(slug)
          M.root .. "/kg/entities/" .. slug .. ".ttl"
 end
 
----Open the md and ttl for a given slug as a vsplit (md left, ttl right).
 ---@param slug string
 function M.open_entity(slug)
   local md, ttl = M.paths(slug)
@@ -27,10 +22,8 @@ function M.open_entity(slug)
     return
   end
   vim.cmd("edit " .. vim.fn.fnameescape(md))
-  vim.cmd("vsplit " .. vim.fn.fnameescape(ttl))
 end
 
----Jump between the .md and its .ttl sidecar (replaces current buffer).
 function M.jump_sidecar()
   local p = vim.fn.expand("%:p")
   local target

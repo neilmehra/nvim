@@ -1,6 +1,3 @@
--- lua/kb/create.lua
--- Two-field capture flow: name + type. Slug is random.
-
 local M = {}
 local kb = require("kb")
 local Slug = require("kb.slug")
@@ -23,7 +20,6 @@ local function ensure_dirs()
   vim.fn.mkdir(kb.root .. "/kg/entities", "p")
 end
 
----Ensure a category-node TTL exists for `cat_slug` (the normalized form).
 ---@param cat_slug string
 ---@param label string  human-readable label for the category
 local function ensure_category(cat_slug, label)
@@ -82,7 +78,6 @@ local function write_entity(slug, name, types)
   fttl:close()
 end
 
----Create a new entity. Prompts for name + type, opens vsplit.
 function M.create()
   ensure_dirs()
   vim.ui.input({ prompt = "name: " }, function(name)

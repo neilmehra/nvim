@@ -1,9 +1,5 @@
--- lua/kb/setup.lua
--- Add  require("kb.setup")  in init.lua after require("autocommands").
-
 local kb = require("kb")
 
--- No-op on machines without a KB (see kb/init.lua M.enabled).
 if not kb.enabled then return end
 
 -- ── Autocmd: inject TTL prefixes in new files under kg/ ──────
