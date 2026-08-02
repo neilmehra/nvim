@@ -70,4 +70,19 @@ function M.insert_entity_ref()
   end)
 end
 
+---Fuzzy-search entities by label and open the selected one (md + ttl vsplit).
+---<C-n> on a query with no match creates a new entity with that label.
+function M.find_entity()
+  local kb = require("kb")
+  local Sparql = require("kb.sparql")
+  M.pick("KB: find entity", Sparql.list_entities(), { allow_new = true }, function(res)
+    if not res then return end
+    if res.is_new then
+      require("kb.create").create_with_name(res.label)
+    elseif res.slug then
+      kb.open_entity(res.slug)
+    end
+  end)
+end
+
 return M

@@ -79,22 +79,8 @@ local function write_entity(slug, name, types)
 end
 
 function M.create()
-  ensure_dirs()
   vim.ui.input({ prompt = "name: " }, function(name)
-    if not name or name == "" then return end
-    vim.ui.input({ prompt = "type (comma-sep, blank = later): " }, function(type_raw)
-      local types = parse_types(type_raw or "")
-      for _, t in ipairs(types) do ensure_category(t.slug, t.label) end
-
-      local slug = Slug.new()
-      write_entity(slug, name, types)
-
-      local md, ttl = kb.paths(slug)
-      vim.cmd("edit " .. vim.fn.fnameescape(md))
-      vim.cmd("vsplit " .. vim.fn.fnameescape(ttl))
-      vim.cmd("wincmd h")  -- focus md
-      vim.cmd("normal! G")
-    end)
+    M.create_with_name(name)
   end)
 end
 

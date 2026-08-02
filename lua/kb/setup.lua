@@ -24,6 +24,7 @@ local function map(mode, lhs, rhs, desc)
 end
 
 map("n", "<leader>K",  function() require("kb.create").create() end,        "KB: new entity")
+map("n", "<leader>kn", function() require("kb.telescope").find_entity() end, "KB: find entity by name")
 map("n", "<leader>kt", function() require("kb.type").add_type() end,        "KB: add type")
 map("n", "<leader>ke", function() require("kb.edge").add_edge() end,        "KB: add edge")
 map("n", "<leader>kj", function() require("kb").jump_sidecar() end,         "KB: jump md ↔ ttl")
