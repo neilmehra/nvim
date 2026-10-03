@@ -96,7 +96,7 @@ return {
       compile_directory = ".",
       compile_command = {
         c = { exec = "gcc", args = { "-Wall", "$(FNAME)", "-o", "$(FNOEXT)" } },
-        cpp = { exec = "g++", args = { "-std=c++20", "-Wall", "$(FNAME)", "-o", "$(FNOEXT)" } },
+        cpp = { exec = "g++", args = { "-std=c++23", "-Wall", "-I" .. vim.fn.expand "~/.local/include", "$(FNAME)", "-o", "$(FNOEXT)" } },
         rust = { exec = "rustc", args = { "$(FNAME)" } },
         java = { exec = "javac", args = { "$(FNAME)" } },
       },
@@ -140,7 +140,7 @@ return {
       {
         "<leader>cd",
         "<cmd>CompetiTest delete_testcase<CR>",
-        desc = "CompetiTest Receive Testcases",
+        desc = "CompetiTest Delete",
       },
       {
         "<leader>ct",

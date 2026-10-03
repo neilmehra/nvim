@@ -78,6 +78,46 @@ local function write_entity(slug, name, types)
   fttl:close()
 end
 
+---Pick a slug that isn't already taken. Collisions are astronomically
+---unlikely at 32^8, but a stat is cheaper than a silent overwrite.
+local function fresh_slug()
+  for _ = 1, 10 do
+    local slug = Slug.new()
+    local md, ttl = kb.paths(slug)
+    if vim.fn.filereadable(md) == 0 and vim.fn.filereadable(ttl) == 0 then
+      return slug
+    end
+  end
+  return nil
+end
+
+---Create the md + ttl pair for `name`, after prompting for types.
+---@param name string|nil  human-readable label; nil/blank aborts
+function M.create_with_name(name)
+  if not name then return end
+  name = name:gsub("^%s+", ""):gsub("%s+$", "")
+  if name == "" then return end
+
+  vim.ui.input({ prompt = "types (comma-separated, optional): " }, function(raw_types)
+    if raw_types == nil then return end  -- cancelled
+
+    local slug = fresh_slug()
+    if not slug then
+      vim.notify("KB: could not allocate a free slug", vim.log.levels.ERROR)
+      return
+    end
+
+    local types = parse_types(raw_types)
+    ensure_dirs()
+    for _, t in ipairs(types) do ensure_category(t.slug, t.label) end
+    write_entity(slug, name, types)
+    kb.sync()
+
+    kb.open_entity(slug)
+    vim.api.nvim_win_set_cursor(0, { vim.api.nvim_buf_line_count(0), 0 })
+  end)
+end
+
 function M.create()
   vim.ui.input({ prompt = "name: " }, function(name)
     M.create_with_name(name)

@@ -1,3 +1,5 @@
+local is_mac = vim.fn.has "mac" == 1
+
 vim.api.nvim_create_autocmd({ "FileType" }, {
   pattern = { "qf", "help", "man", "lspinfo", "spectre_panel" },
   callback = function()
@@ -44,7 +46,16 @@ vim.api.nvim_create_autocmd("BufWritePost", {
     local file = vim.fn.expand "%:p"
     local dir = vim.fn.fnamemodify(file, ":h")
     local filename = vim.fn.fnamemodify(file, ":t")
-    local cmd = { "pdflatex", "-interaction=nonstopmode", filename }
+    -- macOS box has tectonic (homebrew), linux box has a full TeX Live
+    local cmd
+    if vim.fn.executable "tectonic" == 1 and (is_mac or vim.fn.executable "pdflatex" == 0) then
+      cmd = { "tectonic", "--chatter", "minimal", filename }
+    elseif vim.fn.executable "pdflatex" == 1 then
+      cmd = { "pdflatex", "-interaction=nonstopmode", filename }
+    else
+      vim.notify("LaTeX: no tectonic or pdflatex on PATH", vim.log.levels.WARN)
+      return
+    end
     vim.fn.jobstart(cmd, {
       cwd = dir,
       on_exit = function(_, exit_code, _)
