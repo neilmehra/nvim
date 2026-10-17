@@ -36,15 +36,7 @@ keymap("n", "<S-q>", delete_buffer, opts)
 -- Better paste
 keymap("v", "p", '"_dP', opts)
 
--- Paste image from clipboard into current buffer dir (Markdown)
-local function paste_image()
-  local filename = os.date("image_%Y%m%d_%H%M%S") .. ".png"
-  local dir = vim.fn.expand("%:p:h")
-  local path = dir .. "/" .. filename
-  vim.fn.system("xclip -selection clipboard -t image/png -o > " .. vim.fn.shellescape(path))
-  vim.api.nvim_put({ "![](" .. filename .. ")" }, "", true, true)
-end
-keymap("n", "<leader>p", paste_image, { desc = "Paste clipboard image" })
+-- Paste image from clipboard: <leader>p, see plugins/img-clip.lua
 
 
 -- Visual --
